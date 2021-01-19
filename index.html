@@ -5,7 +5,18 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Movie Search</title>
 		<style>
-			ul {
+			#pagination li {
+				width: 20px;
+				display: inline-block;
+				cursor: pointer;
+			}
+			#pagination li.active {
+				background-color: lightblue;
+			}
+			#pagination li.active:hover {
+				cursor: default;
+			}
+			#movies {
 				margin: 0;
 				padding: 0;
 			}
@@ -22,34 +33,41 @@
 		</style>
 	</head>
 	<body>
+		<ul id="pagination">
+			<li class="active">1</li>
+			<li>2</li>
+			<li>3</li>
+		</ul>
 		<ul id="movies"></ul>
 		<script>
 			let xhttp = null;
 			let page = 1;
-			let url = `https://api.themoviedb.org/3/movie/upcoming?api_key=81f382d33088c6d52099a62eab51d967&language=en-US&page=${page}`;
+			let url = `https://api.themoviedb.org/3/movie/upcoming?api_key=81f382d33088c6d52099a62eab51d967&language=en-US&page=`;
 
-			(() => {
+			const loadMovies = (url) => {
 				console.log("Loading movies...");
-				window.addEventListener("load", (event) => {
-					xhttp = new XMLHttpRequest();
-					xhttp.onreadystatechange = function () {
-						try {
-							if (this.readyState == 4) {
-								if (this.status === 200) {
-									renderMovies(JSON.parse(this.responseText).results);
-								} else {
-									alert("There was a problem with the request.");
-								}
+				xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function () {
+					try {
+						if (this.readyState == 4) {
+							if (this.status === 200) {
+								renderMovies(JSON.parse(this.responseText).results);
+							} else {
+								alert("There was a problem with the request.");
 							}
-						} catch (e) {
-							alert("Server error, try again!");
 						}
-					};
+					} catch (e) {
+						alert("Server error, try again!");
+					}
+				};
 
-					xhttp.open("GET", url, true);
-					xhttp.send();
-				});
-			})();
+				xhttp.open("GET", url, true);
+				xhttp.send();
+			};
+
+			window.addEventListener("load", (event) => {
+				loadMovies(url + page);
+			});
 
 			const togglePreview = (id) => {
 				console.log("Toggle preview...", id);
@@ -86,19 +104,36 @@
 				console.log("Rendering movies...");
 				let moviesEl = document.getElementById("movies");
 
+				moviesEl.innerHTML = "";
+
 				movies.forEach((movie, i) => {
 					let li = document.createElement("li");
-					li.addEventListener("mouseover", () => {
-						togglePreview(movie.id);
-					});
-					li.addEventListener("mouseout", () => {
-						togglePreview();
-					});
+					// li.addEventListener("mouseover", () => {
+					// 	togglePreview(movie.id);
+					// });
+					// li.addEventListener("mouseout", () => {
+					// 	togglePreview();
+					// });
 					li.setAttribute("id", movie.id);
 					li.innerHTML = `${movie.original_title} | ${movie.original_language} | ${movie.vote_average}`;
 					moviesEl.append(li);
 				});
 			};
+
+			const paginationEl = document.querySelectorAll("#pagination li");
+			paginationEl.forEach((pagination) => {
+				pagination.addEventListener("click", (e) => {
+					let oldTarget = document.querySelector("#pagination li.active");
+					let target = e.target;
+
+					if (oldTarget !== target) {
+						oldTarget.classList.remove("active");
+						target.classList.add("active");
+						page = +e.target.innerHTML;
+						loadMovies(url + page);
+					}
+				});
+			});
 		</script>
 	</body>
 </html>
