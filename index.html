@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Movie Search</title>
+		<style>
+			ul {
+				margin: 0;
+				padding: 0;
+			}
+			li {
+				display: block;
+				background-color: salmon;
+				width: 250px;
+				margin: 10px;
+				padding: 10px;
+			}
+			li:hover {
+				background-color: yellow;
+			}
+		</style>
+	</head>
+	<body>
+		<ul id="movies"></ul>
+		<script>
+			let xhttp = null;
+			let page = 1;
+			let url = `https://api.themoviedb.org/3/movie/upcoming?api_key=81f382d33088c6d52099a62eab51d967&language=en-US&page=${page}`;
+
+			(() => {
+				console.log("Loading movies...");
+				window.addEventListener("load", (event) => {
+					xhttp = new XMLHttpRequest();
+					xhttp.onreadystatechange = function () {
+						try {
+							if (this.readyState == 4) {
+								if (this.status === 200) {
+									renderMovies(JSON.parse(this.responseText).results);
+								} else {
+									alert("There was a problem with the request.");
+								}
+							}
+						} catch (e) {
+							alert("Server error, try again!");
+						}
+					};
+
+					xhttp.open("GET", url, true);
+					xhttp.send();
+				});
+			})();
+
+			const togglePreview = (id) => {
+				console.log("Toggle preview...", id);
+
+				/* show movie content on mouseover */
+				if (id) {
+					xhttp = new XMLHttpRequest();
+					xhttp.onreadystatechange = function () {
+						try {
+							if (this.readyState == 4 && this.status == 200) {
+								let movies = JSON.parse(this.responseText).results;
+								movies.forEach((movie) => {
+									if (movie.id === id) {
+										console.log(movie.overview);
+										let el = document.getElementById(`${id}`);
+										el.innerHTML += `<p>${movie.overview}</p>`;
+									}
+								});
+							}
+						} catch (e) {
+							alert("Server error, try again!");
+						}
+					};
+
+					xhttp.open("GET", url, true);
+					xhttp.send();
+					/* hide content if data not fetched and mouseout */
+				} else {
+					xhttp.abort();
+				}
+			};
+
+			const renderMovies = (movies) => {
+				console.log("Rendering movies...");
+				let moviesEl = document.getElementById("movies");
+
+				movies.forEach((movie, i) => {
+					let li = document.createElement("li");
+					li.addEventListener("mouseover", () => {
+						togglePreview(movie.id);
+					});
+					li.addEventListener("mouseout", () => {
+						togglePreview();
+					});
+					li.setAttribute("id", movie.id);
+					li.innerHTML = `${movie.original_title} | ${movie.original_language} | ${movie.vote_average}`;
+					moviesEl.append(li);
+				});
+			};
+		</script>
+	</body>
+</html>
