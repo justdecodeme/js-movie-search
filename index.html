@@ -33,25 +33,42 @@
 		</style>
 	</head>
 	<body>
+		<label for="title">Title</label>
+		<input id="title" type="text" placeholder="Text" />
+		<label for="language">Language</label>
+		<select id="language"></select>
+		<button id="searchBtn">Search</button>
+
 		<ul id="pagination">
 			<li class="active">1</li>
 			<li>2</li>
 			<li>3</li>
 		</ul>
+
 		<ul id="movies"></ul>
+
 		<script>
 			let xhttp = null;
+			let movies = [];
 			let page = 1;
 			let url = `https://api.themoviedb.org/3/movie/upcoming?api_key=81f382d33088c6d52099a62eab51d967&language=en-US&page=`;
 
-			const loadMovies = (url) => {
+			let languages = {};
+			let languageEl = document.getElementById("language");
+			let titleEl = document.getElementById("title");
+
+			/* ********** */
+			/* MOVIE LIST */
+			/* ********** */
+			const loadMovies = (url, isFilter) => {
 				console.log("Loading movies...");
 				xhttp = new XMLHttpRequest();
 				xhttp.onreadystatechange = function () {
 					try {
 						if (this.readyState == 4) {
 							if (this.status === 200) {
-								renderMovies(JSON.parse(this.responseText).results);
+								movies = JSON.parse(this.responseText).results;
+								renderMovies(isFilter);
 							} else {
 								alert("There was a problem with the request.");
 							}
@@ -65,9 +82,56 @@
 				xhttp.send();
 			};
 
-			window.addEventListener("load", (event) => {
-				loadMovies(url + page);
-			});
+			const renderMovies = (isFilter) => {
+				console.log("Rendering movies...");
+				let filterMovies = [...movies];
+				let filterObj = { text: titleEl.value.toLowerCase(), lang: languageEl.value };
+
+				if (isFilter) {
+					filterMovies = movies.filter((movie) => {
+						console.log(movie.original_title.indexOf(filterObj.text));
+						let filterText = true;
+						let filterLang = true;
+
+						if (filterObj.text !== "") {
+							filterText = movie.original_title.toLowerCase().indexOf(filterObj.text) > -1;
+						}
+						if (filterObj.lang !== "all") {
+							filterLang = movie.original_language === filterObj.lang;
+						}
+
+						return filterText && filterLang;
+					});
+				}
+
+				let moviesEl = document.getElementById("movies");
+
+				moviesEl.innerHTML = "";
+
+				filterMovies.forEach((movie, i) => {
+					let li = document.createElement("li");
+					// li.addEventListener("mouseover", () => {
+					// 	togglePreview(movie.id);
+					// });
+					// li.addEventListener("mouseout", () => {
+					// 	togglePreview();
+					// });
+					li.setAttribute("id", movie.id);
+					li.innerHTML = `${movie.original_title} | ${movie.original_language} | ${movie.vote_average}`;
+					moviesEl.append(li);
+
+					if (languageEl.innerHTML === "") {
+						languageEl.innerHTML = `<option value="all">All</option>`;
+					}
+					if (!languages[movie.original_language]) {
+						languages[movie.original_language] = movie.original_language;
+						let option = document.createElement("option");
+						option.setAttribute("value", movie.original_language);
+						option.innerHTML = movie.original_language;
+						languageEl.append(option);
+					}
+				});
+			};
 
 			const togglePreview = (id) => {
 				console.log("Toggle preview...", id);
@@ -100,27 +164,15 @@
 				}
 			};
 
-			const renderMovies = (movies) => {
-				console.log("Rendering movies...");
-				let moviesEl = document.getElementById("movies");
+			window.addEventListener("load", (event) => {
+				loadMovies(url + page, false);
+			});
 
-				moviesEl.innerHTML = "";
-
-				movies.forEach((movie, i) => {
-					let li = document.createElement("li");
-					// li.addEventListener("mouseover", () => {
-					// 	togglePreview(movie.id);
-					// });
-					// li.addEventListener("mouseout", () => {
-					// 	togglePreview();
-					// });
-					li.setAttribute("id", movie.id);
-					li.innerHTML = `${movie.original_title} | ${movie.original_language} | ${movie.vote_average}`;
-					moviesEl.append(li);
-				});
-			};
-
+			/* ********** */
+			/* PAGINATION */
+			/* ********** */
 			const paginationEl = document.querySelectorAll("#pagination li");
+
 			paginationEl.forEach((pagination) => {
 				pagination.addEventListener("click", (e) => {
 					let oldTarget = document.querySelector("#pagination li.active");
@@ -130,9 +182,18 @@
 						oldTarget.classList.remove("active");
 						target.classList.add("active");
 						page = +e.target.innerHTML;
-						loadMovies(url + page);
+						loadMovies(url + page, true);
 					}
 				});
+			});
+
+			/* ********** */
+			/* SEARCH */
+			/* ********** */
+			const searchBtnEl = document.getElementById("searchBtn");
+
+			searchBtnEl.addEventListener("click", () => {
+				renderMovies(true);
 			});
 		</script>
 	</body>
