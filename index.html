@@ -18,12 +18,9 @@
 		</div>
 
 		<div class="searches">
-			<p>No search history for now...</p>
-			<!-- <ul id="searchHistoryEl">
-				<li>Text | English <span>x</span></li>
-				<li>Text | English <span>x</span></li>
-				<li>Text | English <span>x</span></li>
-			</ul> -->
+			<ul id="searchHistoryEl">
+				<li class="no_search">No search history for now...</li>
+			</ul>
 			<button id="deleteAll">Delete All</button>
 		</div>
 
@@ -55,12 +52,23 @@
 			let languagesEl = document.getElementById("languagesEl");
 			let titleEl = document.getElementById("titleEl");
 			let moviesEl = document.getElementById("moviesEl");
+			let searchHistoryEl = document.getElementById("searchHistoryEl");
 
 			let searchHistory = [];
 			let searchHistoryLimit = 3;
 			let oldFilterObj = { text: "", lang: "all" };
 			let filterObj = { text: "", lang: "all" };
 			let loader = `<div class="lds-ripple"><div></div><div></div></div>`;
+
+			document.addEventListener("keydown", (e) => {
+				if (document.activeElement === titleEl && e.code === "Enter") {
+					searchBtnEl.click();
+				}
+			});
+
+			window.addEventListener("load", (event) => {
+				loadMovies(url + page, false);
+			});
 
 			/* ********** */
 			/* LANGUAGES */
@@ -102,62 +110,78 @@
 				xhttp.send();
 			};
 
+			const getFilterMovies = (movies) => {
+				return movies.filter((movie) => {
+					let filterText = true;
+					let filterLang = true;
+
+					if (filterObj.text.toLowerCase() !== "") {
+						filterText = movie.original_title.toLowerCase().indexOf(filterObj.text.toLowerCase()) > -1;
+					}
+					if (filterObj.lang !== "all") {
+						filterLang = movie.original_language === filterObj.lang;
+					}
+
+					return filterText && filterLang;
+				});
+			};
+
 			const renderMovies = (isFilter, isClicked = false) => {
 				if (oldFilterObj.text !== filterObj.text || oldFilterObj.lang !== filterObj.lang || !isClicked) {
 					console.log("Rendering movies...");
+
 					let filterMovies = [...movies];
 
 					if (isFilter) {
-						filterMovies = movies.filter((movie) => {
-							let filterText = true;
-							let filterLang = true;
-
-							if (filterObj.text.toLowerCase() !== "") {
-								filterText = movie.original_title.toLowerCase().indexOf(filterObj.text.toLowerCase()) > -1;
-							}
-							if (filterObj.lang !== "all") {
-								filterLang = movie.original_language === filterObj.lang;
-							}
-
-							return filterText && filterLang;
-						});
+						filterMovies = getFilterMovies(movies);
 					}
 
 					moviesEl.innerHTML = "";
 
-					filterMovies.forEach((movie, ind) => {
-						let li = document.createElement("li");
-						// li.addEventListener("mouseover", () => {
-						// 	togglePreview(movie.id);
-						// });
-						// li.addEventListener("mouseout", () => {
-						// 	togglePreview();
-						// });
-						let i = movie.original_title.toLowerCase().indexOf(filterObj.text.toLowerCase());
-						let start = movie.original_title.substring(0, i);
-						let middle = filterObj.text;
-						let end = movie.original_title.substring(i + filterObj.text.length, movie.original_title.length);
-						let movieTitle = `${start}<b><u>${middle}</u></b>${end}`;
-						li.setAttribute("id", movie.id);
-						if (movie.poster_path || movie.backdrop_path) {
-							li.style.backgroundImage = `url(${
-								"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.poster_path || movie.backdrop_path
-							})`;
-						}
-						li.innerHTML = `
+					if (filterMovies.length === 0) {
+						moviesEl.innerHTML = `
+						<li id="464052" style="background-image: url('no-movies.jpg');">
 						<div>
-							<p title=${movie.original_title}>${movieTitle}</p>
+							<p title="Movie Title">Movie Title</p>
+							<p>
+								<span>NA</span>
+								<span>-</span></p>
+						</div></li>
+						`;
+					} else {
+						filterMovies.forEach((movie, ind) => {
+							let li = document.createElement("li");
+							// li.addEventListener("mouseover", () => {
+							// 	togglePreview(movie.id);
+							// });
+							// li.addEventListener("mouseout", () => {
+							// 	togglePreview();
+							// });
+							let i = movie.original_title.toLowerCase().indexOf(filterObj.text.toLowerCase());
+							let start = movie.original_title.substring(0, i);
+							let middle = movie.original_title.substring(i, i + filterObj.text.length);
+							let end = movie.original_title.substring(i + filterObj.text.length, movie.original_title.length);
+							let movieTitle = `${start}<b><u>${middle}</u></b>${end}`;
+							li.setAttribute("id", movie.id);
+							if (movie.poster_path || movie.backdrop_path) {
+								li.style.backgroundImage = `url(${
+									"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.poster_path || movie.backdrop_path
+								})`;
+							}
+
+							li.innerHTML = `
+						<div>
+							<p title="${movie.original_title}">${movieTitle}</p>
 							<p>
 								<span>${languages[movie.original_language]}</span>
 								<span>${movie.vote_average}</span></p>
 						</div>`;
 
-						moviesEl.append(li);
-					});
+							moviesEl.append(li);
+						});
+					}
 
 					if (isClicked) {
-						let searchHistoryEl = document.getElementById("searchHistoryEl");
-
 						if (searchHistory.length === searchHistoryLimit) {
 							searchHistory[2] = searchHistory[1];
 							searchHistory[1] = searchHistory[0];
@@ -172,15 +196,15 @@
 							li.setAttribute("data-text", search.text);
 							li.setAttribute("data-lang", search.lang);
 							li.innerHTML = `${search.text} / ${search.lang}`;
-							li.addEventListener("click", (e) => {
-								filterObj.text = e.target.dataset.text;
-								filterObj.lang = e.target.dataset.lang;
-								renderMovies(true);
-							});
+							// li.addEventListener("click", (e) => {
+							// 	filterObj.text = e.target.dataset.text;
+							// 	filterObj.lang = e.target.dataset.lang;
+							// 	renderMovies(true);
+							// });
 
 							let span = document.createElement("span");
 							span.setAttribute("id", i);
-							span.innerHTML = "Del";
+							span.innerHTML = "x";
 							span.addEventListener("click", (e) => {
 								e.stopPropagation();
 								let i = e.target.getAttribute("id");
@@ -231,10 +255,6 @@
 					xhttp.abort();
 				}
 			};
-
-			window.addEventListener("load", (event) => {
-				loadMovies(url + page, false);
-			});
 
 			/* ********** */
 			/* PAGINATION */

@@ -122,18 +122,25 @@ body {
 	margin-right: 30px;
 	background: #525252;
 	padding: 4px 12px;
-	cursor: pointer;
+	display: flex;
+	align-items: center;
+}
+.searches li.no_search {
+	pointer-events: none;
+	background-color: transparent;
+	padding: 0;
 }
 .searches li span {
-	width: 20px;
-	height: 20px;
+	width: 18px;
+	height: 18px;
 	border-radius: 50%;
 	background-color: #ffffff29;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	margin-left: 5px;
+	margin-left: 10px;
 	cursor: pointer;
+	font-size: 12px;
 }
 .searches li span:hover {
 	opacity: 0.8;
@@ -212,6 +219,8 @@ body {
 	border-bottom: none;
 	list-style: none;
 	background-image: url("poster-holder.jpg");
+	background-position: center;
+	background-size: cover;
 }
 .movies li div {
 	position: absolute;
