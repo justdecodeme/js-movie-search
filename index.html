@@ -27,6 +27,9 @@
 				margin: 10px;
 				padding: 10px;
 			}
+			li span {
+				margin-left: 50px;
+			}
 			li:hover {
 				background-color: yellow;
 			}
@@ -126,9 +129,12 @@
 						let middle = filterObj.text;
 						let end = movie.original_title.substring(i + filterObj.text.length, movie.original_title.length);
 						let movieTitle = `${start}<b><u>${middle}</u></b>${end}`;
-						console.log(start, middle, end);
 						li.setAttribute("id", movie.id);
-						li.innerHTML = `${movieTitle} | ${movie.original_language} | ${movie.vote_average}`;
+						li.innerHTML = `
+						<img src=${"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.backdrop_path}>
+						<img src=${"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.poster_path}>${movieTitle} | ${
+							movie.original_language
+						} | ${movie.vote_average}`;
 						moviesEl.append(li);
 
 						if (languagesEl.innerHTML === "") {
@@ -155,9 +161,35 @@
 						}
 
 						searchHistoryEl.innerHTML = "";
-						searchHistory.forEach((search) => {
+						searchHistory.forEach((search, i) => {
 							let li = document.createElement("li");
+							li.setAttribute("data-text", search.text);
+							li.setAttribute("data-lang", search.lang);
 							li.innerHTML = `${search.text} / ${search.lang}`;
+							li.addEventListener("click", (e) => {
+								filterObj.text = e.target.dataset.text;
+								filterObj.lang = e.target.dataset.lang;
+								renderMovies(true);
+							});
+
+							let span = document.createElement("span");
+							span.setAttribute("id", i);
+							span.innerHTML = "Del";
+							span.addEventListener("click", (e) => {
+								e.stopPropagation();
+								let i = e.target.getAttribute("id");
+								console.log("outside");
+								if (i == 0) {
+									console.log("inside");
+									oldFilterObj = { text: "", lang: "" };
+								}
+								searchHistory.splice(i, 1);
+								span.closest("li").remove();
+								console.log(searchHistory, i);
+								renderMovies(true);
+							});
+
+							li.append(span);
 							searchHistoryEl.append(li);
 						});
 					}
@@ -225,6 +257,7 @@
 			const searchBtnEl = document.getElementById("searchBtnEl");
 
 			searchBtnEl.addEventListener("click", () => {
+				console.log(oldFilterObj, filterObj);
 				filterObj = { text: titleEl.value, lang: languagesEl.value };
 				renderMovies(true, true);
 			});
