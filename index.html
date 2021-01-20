@@ -5,18 +5,18 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Movie Search</title>
 		<style>
-			#pagination li {
+			#paginationEl li {
 				width: 20px;
 				display: inline-block;
 				cursor: pointer;
 			}
-			#pagination li.active {
+			#paginationEl li.active {
 				background-color: lightblue;
 			}
-			#pagination li.active:hover {
+			#paginationEl li.active:hover {
 				cursor: default;
 			}
-			#movies {
+			#moviesEl {
 				margin: 0;
 				padding: 0;
 			}
@@ -34,28 +34,34 @@
 	</head>
 	<body>
 		<label for="title">Title</label>
-		<input id="title" type="text" placeholder="Text" />
+		<input id="titleEl" type="text" placeholder="Text" />
 		<label for="language">Language</label>
-		<select id="language"></select>
-		<button id="searchBtn">Search</button>
+		<select id="languagesEl"></select>
+		<button id="searchBtnEl">Search</button>
 
-		<ul id="pagination">
+		<ul id="paginationEl">
 			<li class="active">1</li>
 			<li>2</li>
 			<li>3</li>
 		</ul>
 
-		<ul id="movies"></ul>
+		<ul id="searchHistoryEl"></ul>
+
+		<ul id="moviesEl"></ul>
 
 		<script>
 			let xhttp = null;
 			let movies = [];
+			let languages = {};
 			let page = 1;
 			let url = `https://api.themoviedb.org/3/movie/upcoming?api_key=81f382d33088c6d52099a62eab51d967&language=en-US&page=`;
 
-			let languages = {};
-			let languageEl = document.getElementById("language");
-			let titleEl = document.getElementById("title");
+			let languagesEl = document.getElementById("languagesEl");
+			let titleEl = document.getElementById("titleEl");
+			let searchHistory = [];
+			let searchHistoryLimit = 3;
+			let oldFilterObj = { text: "", lang: "" };
+			let filterObj = { text: "", lang: "" };
 
 			/* ********** */
 			/* MOVIE LIST */
@@ -82,55 +88,81 @@
 				xhttp.send();
 			};
 
-			const renderMovies = (isFilter) => {
-				console.log("Rendering movies...");
-				let filterMovies = [...movies];
-				let filterObj = { text: titleEl.value.toLowerCase(), lang: languageEl.value };
+			const renderMovies = (isFilter, isClicked = false) => {
+				if (oldFilterObj.text !== filterObj.text || oldFilterObj.lang !== filterObj.lang || !isClicked) {
+					console.log("Rendering movies...");
+					let filterMovies = [...movies];
 
-				if (isFilter) {
-					filterMovies = movies.filter((movie) => {
-						console.log(movie.original_title.indexOf(filterObj.text));
-						let filterText = true;
-						let filterLang = true;
+					if (isFilter) {
+						filterMovies = movies.filter((movie) => {
+							let filterText = true;
+							let filterLang = true;
 
-						if (filterObj.text !== "") {
-							filterText = movie.original_title.toLowerCase().indexOf(filterObj.text) > -1;
+							if (filterObj.text.toLowerCase() !== "") {
+								filterText = movie.original_title.toLowerCase().indexOf(filterObj.text.toLowerCase()) > -1;
+							}
+							if (filterObj.lang !== "all") {
+								filterLang = movie.original_language === filterObj.lang;
+							}
+
+							return filterText && filterLang;
+						});
+					}
+
+					let moviesEl = document.getElementById("moviesEl");
+
+					moviesEl.innerHTML = "";
+
+					filterMovies.forEach((movie, ind) => {
+						let li = document.createElement("li");
+						// li.addEventListener("mouseover", () => {
+						// 	togglePreview(movie.id);
+						// });
+						// li.addEventListener("mouseout", () => {
+						// 	togglePreview();
+						// });
+						let i = movie.original_title.toLowerCase().indexOf(filterObj.text.toLowerCase());
+						let start = movie.original_title.substring(0, i);
+						let middle = filterObj.text;
+						let end = movie.original_title.substring(i + filterObj.text.length, movie.original_title.length);
+						let movieTitle = `${start}<b><u>${middle}</u></b>${end}`;
+						console.log(start, middle, end);
+						li.setAttribute("id", movie.id);
+						li.innerHTML = `${movieTitle} | ${movie.original_language} | ${movie.vote_average}`;
+						moviesEl.append(li);
+
+						if (languagesEl.innerHTML === "") {
+							languagesEl.innerHTML = `<option value="all">All</option>`;
 						}
-						if (filterObj.lang !== "all") {
-							filterLang = movie.original_language === filterObj.lang;
+						if (!languages[movie.original_language]) {
+							languages[movie.original_language] = movie.original_language;
+							let option = document.createElement("option");
+							option.setAttribute("value", movie.original_language);
+							option.innerHTML = movie.original_language;
+							languagesEl.append(option);
 						}
-
-						return filterText && filterLang;
 					});
+
+					if (isClicked) {
+						let searchHistoryEl = document.getElementById("searchHistoryEl");
+
+						if (searchHistory.length === searchHistoryLimit) {
+							searchHistory[2] = searchHistory[1];
+							searchHistory[1] = searchHistory[0];
+							searchHistory[0] = filterObj;
+						} else {
+							searchHistory.unshift(filterObj);
+						}
+
+						searchHistoryEl.innerHTML = "";
+						searchHistory.forEach((search) => {
+							let li = document.createElement("li");
+							li.innerHTML = `${search.text} / ${search.lang}`;
+							searchHistoryEl.append(li);
+						});
+					}
+					oldFilterObj = { ...filterObj };
 				}
-
-				let moviesEl = document.getElementById("movies");
-
-				moviesEl.innerHTML = "";
-
-				filterMovies.forEach((movie, i) => {
-					let li = document.createElement("li");
-					// li.addEventListener("mouseover", () => {
-					// 	togglePreview(movie.id);
-					// });
-					// li.addEventListener("mouseout", () => {
-					// 	togglePreview();
-					// });
-					li.setAttribute("id", movie.id);
-					li.innerHTML = `${movie.original_title} | ${movie.original_language} | ${movie.vote_average}`;
-					moviesEl.append(li);
-
-					if (languageEl.innerHTML === "") {
-						languageEl.innerHTML = `<option value="all">All</option>`;
-					}
-					if (!languages[movie.original_language]) {
-						languages[movie.original_language] = movie.original_language;
-						let option = document.createElement("option");
-						option.setAttribute("value", movie.original_language);
-						option.innerHTML = movie.original_language;
-						languageEl.append(option);
-					}
-				});
 			};
 
 			const togglePreview = (id) => {
@@ -171,11 +203,11 @@
 			/* ********** */
 			/* PAGINATION */
 			/* ********** */
-			const paginationEl = document.querySelectorAll("#pagination li");
+			const paginationEl = document.querySelectorAll("#paginationEl li");
 
 			paginationEl.forEach((pagination) => {
 				pagination.addEventListener("click", (e) => {
-					let oldTarget = document.querySelector("#pagination li.active");
+					let oldTarget = document.querySelector("#paginationEl li.active");
 					let target = e.target;
 
 					if (oldTarget !== target) {
@@ -190,10 +222,11 @@
 			/* ********** */
 			/* SEARCH */
 			/* ********** */
-			const searchBtnEl = document.getElementById("searchBtn");
+			const searchBtnEl = document.getElementById("searchBtnEl");
 
 			searchBtnEl.addEventListener("click", () => {
-				renderMovies(true);
+				filterObj = { text: titleEl.value, lang: languagesEl.value };
+				renderMovies(true, true);
 			});
 
 			/* ********** */
