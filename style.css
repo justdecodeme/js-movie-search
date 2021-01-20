@@ -1,0 +1,246 @@
+/* ********** */
+/* COMMON */
+/* ********** */
+body {
+	background-color: rgb(41, 40, 40);
+	color: white;
+	font-family: "Roboto", sans-serif;
+}
+* {
+	box-sizing: border-box;
+}
+
+/* ********** */
+/* LOADER */
+/* ********** */
+.lds-ripple {
+	display: inline-block;
+	position: relative;
+	width: 80px;
+	height: 80px;
+}
+.lds-ripple div {
+	position: absolute;
+	border: 4px solid #fff;
+	opacity: 1;
+	border-radius: 50%;
+	animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+.lds-ripple div:nth-child(2) {
+	animation-delay: -0.5s;
+}
+@keyframes lds-ripple {
+	0% {
+		top: 36px;
+		left: 36px;
+		width: 0;
+		height: 0;
+		opacity: 1;
+	}
+	100% {
+		top: 0px;
+		left: 0px;
+		width: 72px;
+		height: 72px;
+		opacity: 0;
+	}
+}
+
+/* ********** */
+/* SEARCH PANEL */
+/* ********** */
+.search_panel {
+	background: #404040;
+	padding: 15px;
+	max-width: 710px;
+	margin: 0 auto;
+	justify-content: space-between;
+	display: flex;
+	align-items: center;
+}
+.search_panel * {
+	margin-right: 15px;
+}
+.search_panel label {
+	font-size: 16px;
+}
+.search_panel #titleEl {
+	flex: 1;
+	margin-right: 25px;
+	/* background: transparent; */
+	background-color: rgba(255, 255, 255, 0.056);
+	border: 1px solid #ffffff4a;
+	padding: 6px;
+	color: white;
+}
+.search_panel #languagesEl {
+	color: white;
+	padding: 6px;
+	margin-right: 25px;
+	border: 1px solid #ffffff4a;
+	background-color: rgba(255, 255, 255, 0.159);
+}
+.search_panel #languagesEl option {
+	color: black;
+}
+.search_panel #searchBtnEl {
+	margin-right: 0;
+	margin-right: 0;
+	background: #ff0e0e;
+	border: none;
+	color: white;
+	padding: 8px 10px;
+	cursor: pointer;
+	width: 115px;
+}
+.search_panel #searchBtnEl:hover {
+	opacity: 0.9;
+}
+
+/* ********** */
+/* SEARCHES */
+/* ********** */
+.searches {
+	margin: 0 auto;
+	padding: 0;
+	max-width: 710px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: #313131;
+	padding: 5px 15px;
+	font-size: 13px;
+}
+.searches ul {
+	margin: 0;
+	padding: 0;
+	display: flex;
+}
+.searches li {
+	list-style: none;
+	margin-right: 30px;
+	background: #525252;
+	padding: 4px 12px;
+	cursor: pointer;
+}
+.searches li span {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	background-color: #ffffff29;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 5px;
+	cursor: pointer;
+}
+.searches li span:hover {
+	opacity: 0.8;
+}
+.searches button {
+	margin-right: 0;
+	margin-right: 0;
+	background: #ffffff29;
+	border: none;
+	color: white;
+	padding: 8px 10px;
+	cursor: pointer;
+	width: 115px;
+}
+.searches button:hover {
+	opacity: 0.8;
+}
+
+/* ********** */
+/* PAGINATION */
+/* ********** */
+.pagination {
+	display: flex;
+	justify-content: center;
+}
+.pagination ul {
+	display: inline-flex;
+	background: #404040;
+	margin: 20px 0;
+	padding: 10px;
+}
+.pagination ul li {
+	width: 40px;
+	height: 30px;
+	display: inline-block;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 10px;
+}
+.pagination ul li:last-child {
+	margin-right: 0;
+}
+.pagination ul li:hover {
+	background-color: #ff0e0e5c;
+}
+.pagination ul li:active {
+	background-color: #ff0e0e35;
+}
+.pagination ul li.active {
+	background-color: #ff0e0e;
+}
+.pagination ul li.active:hover {
+	background-color: #ff0e0e;
+	cursor: default;
+}
+
+/* ********** */
+/* MOVIE LIST */
+/* ********** */
+.movies {
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+.movies li {
+	position: relative;
+	width: 220px;
+	height: 330px;
+	margin: 10px 10px 100px 10px;
+	padding: 10px;
+	border: 1px solid #565656;
+	border-bottom: none;
+	list-style: none;
+}
+.movies li div {
+	position: absolute;
+	top: 100%;
+	background: #ffffff12;
+	width: calc(100% + 2px);
+	left: -1px;
+	color: black;
+	color: white;
+	padding: 10px;
+	border: 1px solid #565656;
+}
+.movies li div * {
+	margin: 0;
+}
+.movies li div p {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.movies li div p:nth-child(1) {
+	padding-bottom: 7px;
+	margin-bottom: 5px;
+	border-bottom: 1px solid #5656569e;
+}
+.movies li div p:nth-child(2) {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-size: 13px;
+}
+.movies li:hover {
+	background-color: yellow;
+}

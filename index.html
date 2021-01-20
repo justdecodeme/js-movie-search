@@ -4,59 +4,52 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Movie Search</title>
-		<style>
-			#paginationEl li {
-				width: 20px;
-				display: inline-block;
-				cursor: pointer;
-			}
-			#paginationEl li.active {
-				background-color: lightblue;
-			}
-			#paginationEl li.active:hover {
-				cursor: default;
-			}
-			#moviesEl {
-				margin: 0;
-				padding: 0;
-			}
-			li {
-				display: block;
-				background-color: salmon;
-				width: 250px;
-				margin: 10px;
-				padding: 10px;
-			}
-			li span {
-				margin-left: 50px;
-			}
-			li:hover {
-				background-color: yellow;
-			}
-		</style>
+		<link rel="preconnect" href="https://fonts.gstatic.com" />
+		<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400&display=swap" rel="stylesheet" />
+		<link rel="stylesheet" href="style.css" />
 	</head>
 	<body>
-		<label for="title">Title</label>
-		<input id="titleEl" type="text" placeholder="Text" />
-		<label for="language">Language</label>
-		<select id="languagesEl"></select>
-		<button id="searchBtnEl">Search</button>
+		<div class="search_panel">
+			<label for="title">Title</label>
+			<input id="titleEl" type="text" placeholder="Search by title..." />
+			<label for="language">Language</label>
+			<select id="languagesEl"></select>
+			<button id="searchBtnEl">Search</button>
+		</div>
 
-		<ul id="paginationEl">
-			<li class="active">1</li>
-			<li>2</li>
-			<li>3</li>
-		</ul>
+		<div class="searches">
+			<p>No search history for now...</p>
+			<!-- <ul id="searchHistoryEl">
+				<li>Text | English <span>x</span></li>
+				<li>Text | English <span>x</span></li>
+				<li>Text | English <span>x</span></li>
+			</ul> -->
+			<button id="deleteAll">Delete All</button>
+		</div>
 
-		<ul id="searchHistoryEl"></ul>
+		<div class="pagination">
+			<ul id="paginationEl">
+				<li class="active">1</li>
+				<li>2</li>
+				<li>3</li>
+			</ul>
+		</div>
 
-		<ul id="moviesEl"></ul>
+		<ul id="moviesEl" class="movies"></ul>
 
 		<script>
 			let xhttp = null;
 			let movies = [];
-			let languages = {};
-			let page = 1;
+			let languages = {
+				da: "Danish",
+				en: "English",
+				fr: "French",
+				it: "Italian",
+				ja: "Japanese",
+				nl: "Dutch",
+				ru: "Russian",
+			};
+			let page = 2;
 			let url = `https://api.themoviedb.org/3/movie/upcoming?api_key=81f382d33088c6d52099a62eab51d967&language=en-US&page=`;
 
 			let languagesEl = document.getElementById("languagesEl");
@@ -65,10 +58,25 @@
 			let searchHistoryLimit = 3;
 			let oldFilterObj = { text: "", lang: "" };
 			let filterObj = { text: "", lang: "" };
+			let loader = `<div class="lds-ripple"><div></div><div></div></div>`;
 
 			/* ********** */
 			/* MOVIE LIST */
 			/* ********** */
+
+			if (languagesEl.innerHTML === "") {
+				languagesEl.innerHTML = `<option value="all">All</option>`;
+			}
+
+			for (var key in languages) {
+				if (languages.hasOwnProperty(key)) {
+					let option = document.createElement("option");
+					option.setAttribute("value", key);
+					option.innerHTML = languages[key];
+					languagesEl.append(option);
+				}
+			}
+
 			const loadMovies = (url, isFilter) => {
 				console.log("Loading movies...");
 				xhttp = new XMLHttpRequest();
@@ -130,24 +138,20 @@
 						let end = movie.original_title.substring(i + filterObj.text.length, movie.original_title.length);
 						let movieTitle = `${start}<b><u>${middle}</u></b>${end}`;
 						li.setAttribute("id", movie.id);
+						li.style.backgroundImage = `url(${
+							"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.poster_path
+						})`;
 						li.innerHTML = `
-						<img src=${"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.backdrop_path}>
-						<img src=${"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.poster_path}>${movieTitle} | ${
-							movie.original_language
-						} | ${movie.vote_average}`;
-						moviesEl.append(li);
+						<div>
+							<p title=${movie.original_title}>${movieTitle}</p>
+							<p>
+								<span>${languages[movie.original_language]}</span>
+								<span>${movie.vote_average}</span></p>
+						</div>`;
 
-						if (languagesEl.innerHTML === "") {
-							languagesEl.innerHTML = `<option value="all">All</option>`;
-						}
-						if (!languages[movie.original_language]) {
-							languages[movie.original_language] = movie.original_language;
-							let option = document.createElement("option");
-							option.setAttribute("value", movie.original_language);
-							option.innerHTML = movie.original_language;
-							languagesEl.append(option);
-						}
+						moviesEl.append(li);
 					});
+					console.log(languages);
 
 					if (isClicked) {
 						let searchHistoryEl = document.getElementById("searchHistoryEl");
