@@ -14,10 +14,11 @@ body {
 /* LOADER */
 /* ********** */
 .lds-ripple {
-	display: inline-block;
 	position: relative;
 	width: 80px;
 	height: 80px;
+	margin: 50px auto;
+	display: block;
 }
 .lds-ripple div {
 	position: absolute;
@@ -210,6 +211,7 @@ body {
 	border: 1px solid #565656;
 	border-bottom: none;
 	list-style: none;
+	background-image: url("poster-holder.jpg");
 }
 .movies li div {
 	position: absolute;
@@ -242,5 +244,4 @@ body {
 	font-size: 13px;
 }
 .movies li:hover {
-	background-color: yellow;
 }

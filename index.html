@@ -49,25 +49,23 @@
 				nl: "Dutch",
 				ru: "Russian",
 			};
-			let page = 2;
+			let page = 1;
 			let url = `https://api.themoviedb.org/3/movie/upcoming?api_key=81f382d33088c6d52099a62eab51d967&language=en-US&page=`;
 
 			let languagesEl = document.getElementById("languagesEl");
 			let titleEl = document.getElementById("titleEl");
+			let moviesEl = document.getElementById("moviesEl");
+
 			let searchHistory = [];
 			let searchHistoryLimit = 3;
-			let oldFilterObj = { text: "", lang: "" };
-			let filterObj = { text: "", lang: "" };
+			let oldFilterObj = { text: "", lang: "all" };
+			let filterObj = { text: "", lang: "all" };
 			let loader = `<div class="lds-ripple"><div></div><div></div></div>`;
 
 			/* ********** */
-			/* MOVIE LIST */
+			/* LANGUAGES */
 			/* ********** */
-
-			if (languagesEl.innerHTML === "") {
-				languagesEl.innerHTML = `<option value="all">All</option>`;
-			}
-
+			languagesEl.innerHTML = `<option value="all">All</option>`;
 			for (var key in languages) {
 				if (languages.hasOwnProperty(key)) {
 					let option = document.createElement("option");
@@ -77,6 +75,9 @@
 				}
 			}
 
+			/* ********** */
+			/* MOVIE LIST */
+			/* ********** */
 			const loadMovies = (url, isFilter) => {
 				console.log("Loading movies...");
 				xhttp = new XMLHttpRequest();
@@ -89,6 +90,8 @@
 							} else {
 								alert("There was a problem with the request.");
 							}
+						} else {
+							moviesEl.innerHTML = loader;
 						}
 					} catch (e) {
 						alert("Server error, try again!");
@@ -120,8 +123,6 @@
 						});
 					}
 
-					let moviesEl = document.getElementById("moviesEl");
-
 					moviesEl.innerHTML = "";
 
 					filterMovies.forEach((movie, ind) => {
@@ -138,9 +139,11 @@
 						let end = movie.original_title.substring(i + filterObj.text.length, movie.original_title.length);
 						let movieTitle = `${start}<b><u>${middle}</u></b>${end}`;
 						li.setAttribute("id", movie.id);
-						li.style.backgroundImage = `url(${
-							"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.poster_path
-						})`;
+						if (movie.poster_path || movie.backdrop_path) {
+							li.style.backgroundImage = `url(${
+								"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.poster_path || movie.backdrop_path
+							})`;
+						}
 						li.innerHTML = `
 						<div>
 							<p title=${movie.original_title}>${movieTitle}</p>
@@ -151,7 +154,6 @@
 
 						moviesEl.append(li);
 					});
-					console.log(languages);
 
 					if (isClicked) {
 						let searchHistoryEl = document.getElementById("searchHistoryEl");
@@ -182,10 +184,8 @@
 							span.addEventListener("click", (e) => {
 								e.stopPropagation();
 								let i = e.target.getAttribute("id");
-								console.log("outside");
 								if (i == 0) {
-									console.log("inside");
-									oldFilterObj = { text: "", lang: "" };
+									oldFilterObj = { text: "", lang: "all" };
 								}
 								searchHistory.splice(i, 1);
 								span.closest("li").remove();
