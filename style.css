@@ -5,6 +5,7 @@ body {
 	background-color: rgb(41, 40, 40);
 	color: white;
 	font-family: "Roboto", sans-serif;
+	margin: 0;
 }
 * {
 	box-sizing: border-box;
@@ -58,6 +59,19 @@ body {
 	justify-content: space-between;
 	display: flex;
 	align-items: center;
+}
+.search_panel .left {
+	margin-right: 0;
+	flex: 1;
+	display: flex;
+	align-items: center;
+}
+.search_panel .right {
+	margin-right: 0;
+	width: 322px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
 }
 .search_panel * {
 	margin-right: 15px;
@@ -298,4 +312,17 @@ body {
 	font-size: 13px;
 }
 .movies li:hover {
+}
+
+@media only screen and (max-width: 650px) {
+	.search_panel {
+		/* flex-direction: column; */
+	}
+	.search_panel .left label,
+	.search_panel .right label {
+		display: none;
+	}
+	.search_panel .right {
+		width: 236px;
+	}
 }
