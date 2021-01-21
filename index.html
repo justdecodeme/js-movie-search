@@ -85,7 +85,7 @@
 			/* MOVIE LIST */
 			/* ********** */
 			const loadMovies = (url, isFilter) => {
-				// console.log("Loading movies...");
+				console.log("Loading movies...");
 				xhttp = new XMLHttpRequest();
 				xhttp.onreadystatechange = function () {
 					try {
@@ -124,8 +124,8 @@
 				});
 			};
 
-			const renderMovies = (isFilter, isClicked = false) => {
-				// console.log("Rendering movies...");
+			const renderMovies = (isFilter) => {
+				console.log("Rendering movies...");
 
 				let filterMovies = [...movies];
 
@@ -137,37 +137,48 @@
 
 				if (filterMovies.length === 0) {
 					moviesEl.innerHTML = `
-						<li id="464052" style="background-image: url('no-movies.jpg');">
-						<div>
-							<p title="Movie Title">Movie Title</p>
+						<li>
+							<div class="img_outer">
+						<div class="img" style="background-image: url('no-movies.jpg');"></div></div>
+						<div class="info">
+							<p title="Title">Movie Title</p>
 							<p>
-								<span>NA</span>
-								<span>-</span></p>
-						</div></li>
-						`;
+								<span>Language</span>
+								<span>Rating</span></p>
+						</div></li>`;
 				} else {
 					filterMovies.forEach((movie, ind) => {
 						let li = document.createElement("li");
-						// li.addEventListener("mouseover", () => {
-						// 	togglePreview(movie.id);
-						// });
-						// li.addEventListener("mouseout", () => {
-						// 	togglePreview();
-						// });
+						li.addEventListener("mouseover", (e) => {
+							e.stopPropagation();
+							togglePreview(movie.id, "hover");
+						});
+						li.addEventListener("mouseout", (e) => {
+							e.stopPropagation();
+							togglePreview(movie.id, "blur");
+						});
 						let i = movie.original_title.toLowerCase().indexOf(filterObj.text.toLowerCase());
 						let start = movie.original_title.substring(0, i);
 						let middle = movie.original_title.substring(i, i + filterObj.text.length);
 						let end = movie.original_title.substring(i + filterObj.text.length, movie.original_title.length);
 						let movieTitle = `${start}<b><u>${middle}</u></b>${end}`;
-						li.setAttribute("id", movie.id);
-						if (movie.poster_path || movie.backdrop_path) {
-							li.style.backgroundImage = `url(${
-								"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.poster_path || movie.backdrop_path
-							})`;
-						}
+						li.setAttribute("id", "_" + movie.id);
+						// if (movie.poster_path || movie.backdrop_path) {
+						// 	li.style.backgroundImage = `url(${
+						// 		"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.poster_path || movie.backdrop_path
+						// 	})`;
+						// }
 
 						li.innerHTML = `
-						<div>
+						<div class="img_outer">
+						<div class="img" style="background-image: url(${
+							((movie.poster_path || movie.backdrop_path) &&
+								"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.poster_path) ||
+							movie.backdrop_path
+						});"></div></div>
+						<div class="overlay"><div class="lds-ripple"><div></div><div></div></div>
+						</div>
+						<div class="info">
 							<p title="${movie.original_title}">${movieTitle}</p>
 							<p>
 								<span>${languages[movie.original_language]}</span>
@@ -179,21 +190,22 @@
 				}
 			};
 
-			const togglePreview = (id) => {
-				console.log("Toggle preview...", id);
+			const togglePreview = (id, type) => {
+				// console.log("Toggle preview...", id, type);
 
+				let el = document.getElementById(`_${id}`);
 				/* show movie content on mouseover */
-				if (id) {
+				if (type === "hover") {
 					xhttp = new XMLHttpRequest();
 					xhttp.onreadystatechange = function () {
+						el.classList.add("active");
 						try {
 							if (this.readyState == 4 && this.status == 200) {
+								el = el.querySelector(".overlay");
 								let movies = JSON.parse(this.responseText).results;
 								movies.forEach((movie) => {
 									if (movie.id === id) {
-										console.log(movie.overview);
-										let el = document.getElementById(`${id}`);
-										el.innerHTML += `<p>${movie.overview}</p>`;
+										el.innerHTML = `${movie.overview}`;
 									}
 								});
 							}
@@ -202,11 +214,18 @@
 						}
 					};
 
-					xhttp.open("GET", url, true);
+					xhttp.open("GET", url + page, true);
 					xhttp.send();
 					/* hide content if data not fetched and mouseout */
-				} else {
+				} else if (type === "blur") {
 					xhttp.abort();
+					let activeEls = document.querySelectorAll("#moviesEl li.active");
+					activeEls.forEach((el) => {
+						el.classList.remove("active");
+					});
+					el.classList.remove("active");
+					el = el.querySelector(".overlay");
+					el.innerHTML = `<div class="lds-ripple"><div></div><div></div></div>`;
 				}
 			};
 
@@ -249,9 +268,9 @@
 					searchHistoryEl.innerHTML = "";
 					searchHistory.forEach((search, ind) => {
 						let li = document.createElement("li");
-						li.innerHTML = `${search.text} / ${search.lang}`;
-						li.setAttribute("data-text", search.text);
-						li.setAttribute("data-lang", search.lang);
+						li.innerHTML = `${search.text} / ${languages[search.lang] || "All"}`;
+						// li.setAttribute("data-text", search.text);
+						// li.setAttribute("data-lang", search.lang);
 						// li.addEventListener("click", (e) => {
 						// 	filterObj.text = e.target.dataset.text;
 						// 	filterObj.lang = e.target.dataset.lang;

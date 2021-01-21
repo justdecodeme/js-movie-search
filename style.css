@@ -218,11 +218,56 @@ body {
 	border: 1px solid #565656;
 	border-bottom: none;
 	list-style: none;
-	background-image: url("poster-holder.jpg");
+	/* background-image: url("poster-holder.jpg");
+	background-position: center;
+	background-size: cover; */
+}
+.movies li.active .overlay {
+	display: block;
+}
+.movies li.active .img {
+	filter: blur(15px);
+}
+.movies li .img_outer {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	left: 0;
+	color: white;
+	padding: 10px;
+	height: 100%;
+	background: #545454cc;
+	overflow: hidden;
+}
+.movies li .img {
+	position: absolute;
+	transition: all 0.2s ease;
+	top: 0;
+	width: 100%;
+	left: 0;
+	color: white;
+	padding: 10px;
+	height: 100%;
+	background-image: url(poster-holder.jpg);
 	background-position: center;
 	background-size: cover;
 }
-.movies li div {
+.movies li .overlay {
+	pointer-events: none;
+	display: none;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	left: 0;
+	color: white;
+	padding: 10px;
+	height: 100%;
+	background: #46464675;
+	font-size: 15px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.movies li .info {
 	position: absolute;
 	top: 100%;
 	background: #ffffff12;
@@ -233,20 +278,20 @@ body {
 	padding: 10px;
 	border: 1px solid #565656;
 }
-.movies li div * {
+.movies li .info * {
 	margin: 0;
 }
-.movies li div p {
+.movies li .info p {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-.movies li div p:nth-child(1) {
+.movies li .info p:nth-child(1) {
 	padding-bottom: 7px;
 	margin-bottom: 5px;
 	border-bottom: 1px solid #5656569e;
 }
-.movies li div p:nth-child(2) {
+.movies li .info p:nth-child(2) {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
