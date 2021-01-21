@@ -48,17 +48,15 @@
 			};
 			let page = 1;
 			let url = `https://api.themoviedb.org/3/movie/upcoming?api_key=81f382d33088c6d52099a62eab51d967&language=en-US&page=`;
-
-			let languagesEl = document.getElementById("languagesEl");
-			let titleEl = document.getElementById("titleEl");
-			let moviesEl = document.getElementById("moviesEl");
-			let searchHistoryEl = document.getElementById("searchHistoryEl");
-
 			let searchHistory = [];
 			let searchHistoryLimit = 3;
 			let oldFilterObj = { text: "", lang: "all" };
 			let filterObj = { text: "", lang: "all" };
 			let loader = `<div class="lds-ripple"><div></div><div></div></div>`;
+
+			const languagesEl = document.getElementById("languagesEl");
+			const titleEl = document.getElementById("titleEl");
+			const moviesEl = document.getElementById("moviesEl");
 
 			document.addEventListener("keydown", (e) => {
 				if (document.activeElement === titleEl && e.code === "Enter") {
@@ -87,7 +85,7 @@
 			/* MOVIE LIST */
 			/* ********** */
 			const loadMovies = (url, isFilter) => {
-				console.log("Loading movies...");
+				// console.log("Loading movies...");
 				xhttp = new XMLHttpRequest();
 				xhttp.onreadystatechange = function () {
 					try {
@@ -127,19 +125,18 @@
 			};
 
 			const renderMovies = (isFilter, isClicked = false) => {
-				if (oldFilterObj.text !== filterObj.text || oldFilterObj.lang !== filterObj.lang || !isClicked) {
-					console.log("Rendering movies...");
+				// console.log("Rendering movies...");
 
-					let filterMovies = [...movies];
+				let filterMovies = [...movies];
 
-					if (isFilter) {
-						filterMovies = getFilterMovies(movies);
-					}
+				if (isFilter) {
+					filterMovies = getFilterMovies(movies);
+				}
 
-					moviesEl.innerHTML = "";
+				moviesEl.innerHTML = "";
 
-					if (filterMovies.length === 0) {
-						moviesEl.innerHTML = `
+				if (filterMovies.length === 0) {
+					moviesEl.innerHTML = `
 						<li id="464052" style="background-image: url('no-movies.jpg');">
 						<div>
 							<p title="Movie Title">Movie Title</p>
@@ -148,28 +145,28 @@
 								<span>-</span></p>
 						</div></li>
 						`;
-					} else {
-						filterMovies.forEach((movie, ind) => {
-							let li = document.createElement("li");
-							// li.addEventListener("mouseover", () => {
-							// 	togglePreview(movie.id);
-							// });
-							// li.addEventListener("mouseout", () => {
-							// 	togglePreview();
-							// });
-							let i = movie.original_title.toLowerCase().indexOf(filterObj.text.toLowerCase());
-							let start = movie.original_title.substring(0, i);
-							let middle = movie.original_title.substring(i, i + filterObj.text.length);
-							let end = movie.original_title.substring(i + filterObj.text.length, movie.original_title.length);
-							let movieTitle = `${start}<b><u>${middle}</u></b>${end}`;
-							li.setAttribute("id", movie.id);
-							if (movie.poster_path || movie.backdrop_path) {
-								li.style.backgroundImage = `url(${
-									"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.poster_path || movie.backdrop_path
-								})`;
-							}
+				} else {
+					filterMovies.forEach((movie, ind) => {
+						let li = document.createElement("li");
+						// li.addEventListener("mouseover", () => {
+						// 	togglePreview(movie.id);
+						// });
+						// li.addEventListener("mouseout", () => {
+						// 	togglePreview();
+						// });
+						let i = movie.original_title.toLowerCase().indexOf(filterObj.text.toLowerCase());
+						let start = movie.original_title.substring(0, i);
+						let middle = movie.original_title.substring(i, i + filterObj.text.length);
+						let end = movie.original_title.substring(i + filterObj.text.length, movie.original_title.length);
+						let movieTitle = `${start}<b><u>${middle}</u></b>${end}`;
+						li.setAttribute("id", movie.id);
+						if (movie.poster_path || movie.backdrop_path) {
+							li.style.backgroundImage = `url(${
+								"https://www.themoviedb.org/t/p/w220_and_h330_face/" + movie.poster_path || movie.backdrop_path
+							})`;
+						}
 
-							li.innerHTML = `
+						li.innerHTML = `
 						<div>
 							<p title="${movie.original_title}">${movieTitle}</p>
 							<p>
@@ -177,51 +174,8 @@
 								<span>${movie.vote_average}</span></p>
 						</div>`;
 
-							moviesEl.append(li);
-						});
-					}
-
-					if (isClicked) {
-						if (searchHistory.length === searchHistoryLimit) {
-							searchHistory[2] = searchHistory[1];
-							searchHistory[1] = searchHistory[0];
-							searchHistory[0] = filterObj;
-						} else {
-							searchHistory.unshift(filterObj);
-						}
-
-						searchHistoryEl.innerHTML = "";
-						searchHistory.forEach((search, i) => {
-							let li = document.createElement("li");
-							li.setAttribute("data-text", search.text);
-							li.setAttribute("data-lang", search.lang);
-							li.innerHTML = `${search.text} / ${search.lang}`;
-							// li.addEventListener("click", (e) => {
-							// 	filterObj.text = e.target.dataset.text;
-							// 	filterObj.lang = e.target.dataset.lang;
-							// 	renderMovies(true);
-							// });
-
-							let span = document.createElement("span");
-							span.setAttribute("id", i);
-							span.innerHTML = "x";
-							span.addEventListener("click", (e) => {
-								e.stopPropagation();
-								let i = e.target.getAttribute("id");
-								if (i == 0) {
-									oldFilterObj = { text: "", lang: "all" };
-								}
-								searchHistory.splice(i, 1);
-								span.closest("li").remove();
-								console.log(searchHistory, i);
-								renderMovies(true);
-							});
-
-							li.append(span);
-							searchHistoryEl.append(li);
-						});
-					}
-					oldFilterObj = { ...filterObj };
+						moviesEl.append(li);
+					});
 				}
 			};
 
@@ -279,16 +233,72 @@
 			/* SEARCH */
 			/* ********** */
 			const searchBtnEl = document.getElementById("searchBtnEl");
+			const searchHistoryEl = document.getElementById("searchHistoryEl");
+			const deleteAll = document.getElementById("deleteAll");
+
+			const updateSearchHistory = (type) => {
+				if (type === "search") {
+					if (searchHistory.length === searchHistoryLimit) {
+						searchHistory[2] = searchHistory[1];
+						searchHistory[1] = searchHistory[0];
+						searchHistory[0] = filterObj;
+					} else {
+						searchHistory.unshift(filterObj);
+					}
+
+					searchHistoryEl.innerHTML = "";
+					searchHistory.forEach((search, ind) => {
+						let li = document.createElement("li");
+						li.innerHTML = `${search.text} / ${search.lang}`;
+						li.setAttribute("data-text", search.text);
+						li.setAttribute("data-lang", search.lang);
+						// li.addEventListener("click", (e) => {
+						// 	filterObj.text = e.target.dataset.text;
+						// 	filterObj.lang = e.target.dataset.lang;
+						// 	renderMovies(true);
+						// });
+
+						let span = document.createElement("span");
+						span.innerHTML = "x";
+						span.addEventListener("click", (e) => {
+							e.stopPropagation();
+
+							var nodes = Array.from(searchHistoryEl.children);
+							var i = nodes.indexOf(e.target.closest("li"));
+
+							searchHistory.splice(i, 1);
+							span.closest("li").remove();
+
+							if (searchHistory.length === 0) {
+								filterObj = oldFilterObj = { text: titleEl.value, lang: languagesEl.value };
+								searchHistoryEl.innerHTML = `<li class="no_search">No search history for now...</li>`;
+							}
+						});
+
+						li.append(span);
+						searchHistoryEl.append(li);
+					});
+				} else if (type === "delete") {
+					searchHistory = [];
+				}
+			};
 
 			searchBtnEl.addEventListener("click", () => {
-				console.log(oldFilterObj, filterObj);
 				filterObj = { text: titleEl.value, lang: languagesEl.value };
-				renderMovies(true, true);
+				if (oldFilterObj.text !== filterObj.text || oldFilterObj.lang !== filterObj.lang) {
+					updateSearchHistory("search");
+					renderMovies(true);
+					oldFilterObj = { ...filterObj };
+				}
 			});
 
-			/* ********** */
-			/* HISTORY */
-			/* ********** */
+			deleteAll.addEventListener("click", () => {
+				filterObj = { text: titleEl.value, lang: languagesEl.value };
+				if (searchHistory.length > 0) {
+					updateSearchHistory("delete");
+					searchHistoryEl.innerHTML = `<li class="no_search">No search history for now...</li>`;
+				}
+			});
 		</script>
 	</body>
 </html>

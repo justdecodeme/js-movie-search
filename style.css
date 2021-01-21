@@ -120,8 +120,8 @@ body {
 .searches li {
 	list-style: none;
 	margin-right: 30px;
-	background: #525252;
-	padding: 4px 12px;
+	/* background: #525252;
+	padding: 4px 12px; */
 	display: flex;
 	align-items: center;
 }
